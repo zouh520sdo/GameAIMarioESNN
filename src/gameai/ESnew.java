@@ -58,6 +58,10 @@ public class ESnew {
 			population[i] = new MarioESNNController(filename);
 		}
 		
+		for(int i = elite; i < population.length; i++) {
+			population[i] = new MarioESNNController();
+		}
+		
 		r = new Random();
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
@@ -88,8 +92,9 @@ public class ESnew {
 		}
 		OrderRecombine();
 		AddNewGuys();
-		if(this.cmdLineOptions.isVisualization())
-			this.runOneEpisode(population[0]);
+		if(this.cmdLineOptions.isVisualization()) {
+			System.out.println("Fitness " + evaluateSingleLevel(population[0]));
+		}
 		// set true in the main function
 		cmdLineOptions.setVisualization(false);
 		for(int i = elite; i < population.length; i++) {
@@ -159,6 +164,25 @@ public class ESnew {
 	    fitness += this.environment.getKillsTotal();
 	    fitness -= (2-this.environment.getMarioMode())*10;
 	    fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
+	    if(cmdLineOptions.isVisualization())
+	    	System.out.println("Total Fitness: " + fitness + 
+	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
+	    		"+\nKills: " + this.environment.getKillsTotal() + 
+	    		"-\nHealth: " + (2-this.environment.getMarioMode())*10 + 
+	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness());
+	    return fitness;
+	}
+	
+	private float evaluateSingleLevel(Agent agent)
+	{
+		//agent = cmdLineOptions.getAgent();
+		float fitness = 0;
+	    runOneEpisode(agent);
+	    fitness += this.environment.getEvaluationInfo().computeDistancePassed();
+	    //fitness -= (10.0 / this.environment.getEvaluationInfo().computeDistancePassed());
+	    fitness += this.environment.getKillsTotal();
+	    fitness -= (2-this.environment.getMarioMode())*10;
+	    //fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
 	    if(cmdLineOptions.isVisualization())
 	    	System.out.println("Total Fitness: " + fitness + 
 	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
