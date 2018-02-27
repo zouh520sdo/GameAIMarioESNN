@@ -148,10 +148,16 @@ public class ESnew {
 		float fitness = 0;
 	    runOneEpisode(agent);
 	    fitness += this.environment.getEvaluationInfo().computeDistancePassed();
-	    fitness -= (10.0 / this.environment.getEvaluationInfo().computeDistancePassed());
+	    //fitness -= (10.0 / this.environment.getEvaluationInfo().computeDistancePassed());
 	    fitness += this.environment.getKillsTotal();
 	    fitness -= (2-this.environment.getMarioMode())*10;
 	    fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
+	    if(cmdLineOptions.isVisualization())
+	    	System.out.println("Total Fitness: " + fitness + 
+	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
+	    		"+\nKills: " + this.environment.getKillsTotal() + 
+	    		"-\nHealth: " + (2-this.environment.getMarioMode())*10 + 
+	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness());
 	    return fitness;
 	}
 	
