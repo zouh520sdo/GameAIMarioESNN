@@ -11,15 +11,53 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	public NeuralNetwork NN;
 	public int NNInputLength;
 	public double sigma;
+	public int receptiveWidth = 5;
+	public int receptiveHeight = 5;
+	public int stateAmount = 6; // < 12
 	protected double[] input;
-	public String startingWeightsFile;
 	
 	Random r;
+	
+	/**
+	 * Initialize with startingWeightsFile if given
+	 * @param startingWeightsFile Weights text file, can be null
+	 */
 	public MarioESNNController() {
 	    super("ESNNController");
 	    r = new Random(System.currentTimeMillis());
 	    sigma = r.nextDouble() * 2;
-	    startingWeightsFile = null;
+	    
+		// wait for environment info got assigned in BasicMarioAgent
+	    NNInputLength = (2 * receptiveWidth + 1) * (2 * receptiveHeight + 1) +
+	    		(2 * receptiveWidth + 1) * (2 * receptiveHeight + 1) +
+				stateAmount + Environment.numberOfButtons;
+	    input = new double[NNInputLength];
+	    NN = new NeuralNetwork(NNInputLength, Environment.numberOfButtons);
+	    
+    	NN.randomWeights();
+	    NN.writeWeightsToFile("test1.txt");
+	    reset();
+	}
+	
+	public MarioESNNController(String startingWeightsFile) {
+	    super("ESNNController");
+	    r = new Random(System.currentTimeMillis());
+	    sigma = r.nextDouble() * 2;
+		
+		// wait for environment info got assigned in BasicMarioAgent
+	    NNInputLength = (2 * receptiveWidth + 1) * (2 * receptiveHeight + 1) +
+	    		(2 * receptiveWidth + 1) * (2 * receptiveHeight + 1) +
+				stateAmount + Environment.numberOfButtons;
+	    input = new double[NNInputLength];
+	    NN = new NeuralNetwork(NNInputLength, Environment.numberOfButtons);
+	    
+	    if (startingWeightsFile == null) {
+	    	NN.randomWeights();
+	    }
+	    else {
+	    	NN.loadWeights(startingWeightsFile);
+	    }
+	    NN.writeWeightsToFile("test1.txt");
 	    reset();
 	}
 	
@@ -41,27 +79,25 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	
 	@Override
 	public boolean[] getAction() {
-		
-		// wait for environment info got assigned in BasicMarioAgent
-		if (NN == null) {
-		    NNInputLength = levelScene.length * levelScene[0].length +
-					enemies.length * enemies[0].length +
-					marioState.length + Environment.numberOfButtons;
-		    input = new double[NNInputLength];
-		    NN = new NeuralNetwork(NNInputLength, Environment.numberOfButtons);
-		    
-		    if (startingWeightsFile == null) {
-		    	NN.randomWeights();
-		    }
-		    else {
-		    	NN.loadWeights(startingWeightsFile);
-		    }
-		    NN.writeWeightsToFile("test1.txt");
-		}
-		
 		updateInput();
 		action = NN.getButtons(input);
 		return action;
+	}
+	
+	public int getReceptiveEnemyCellValue(int x, int y)
+	{
+	    if (x < 0 || x >= enemies.length || y < 0 || y >= enemies[0].length)
+	        return 0;
+
+	    return enemies[x][y];
+	}
+	
+	public int getMarioStateValue(int x)
+	{
+	    if (x < 0 || x >= marioState.length)
+	        return 0;
+
+	    return marioState[x];
 	}
 	
 	// Update input
@@ -69,35 +105,40 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 		int index = 0;
 		
 		// Level scene info
-		for (int i=0; i<levelScene.length; i++) {
-			for (int j=0; j<levelScene[i].length; j++) {
-				input[index] = levelScene[i][j];
+		for (int i=-receptiveWidth; i<=receptiveWidth; i++) {
+			for (int j=-receptiveHeight; j<=receptiveWidth; j++) {
+				//System.out.println("index " + index);
+				input[index] = getReceptiveFieldCellValue(marioCenter[0]+i, marioCenter[1]+j);
 				index++;
 			}
 		}
 		
 		// Enemies info
-		for (int i=0; i<enemies.length; i++) {
-			for (int j=0; j<enemies[i].length; j++) {
-				input[index] = enemies[i][j];
+		for (int i=-receptiveWidth; i<=receptiveWidth; i++) {
+			for (int j=-receptiveHeight; j<=receptiveWidth; j++) {
+				//System.out.println("index " + index);
+				input[index] = getReceptiveEnemyCellValue(marioCenter[0]+i, marioCenter[1]+j);
 				index++;
 			}
 		}
 		
 		// Mario state
-		for (int i=0; i<marioState.length; i++) {
-			input[index] = marioState[i];
+		for (int i=0; i<stateAmount; i++) {
+			//System.out.println("index " + index);
+			input[index] = getMarioStateValue(i);
 			index++;
 		}
 		
 		// Last buttons 
 		for (int i=0; i<action.length; i++) {
+			//System.out.println("index " + index);
 			if (action[i]) {
 				input[index] = 1;
 			}
 			else {
 				input[index] = 0;
 			}
+			index++;
 		}
 	}
 }

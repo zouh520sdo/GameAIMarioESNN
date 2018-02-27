@@ -23,6 +23,7 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
+	protected int level = 0;
 	
 	public ESnew(int populationSize) {
 		// generate array of random NN 
@@ -33,7 +34,7 @@ public class ESnew {
 		this.fitness = new float[populationSize];
 		this.elite = populationSize/3;
 		r = new Random();
-		String argsString = "-vis off -ld 0 -ag MarioESNNController";
+		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
 		
 		// run the first time
@@ -51,18 +52,14 @@ public class ESnew {
 	public ESnew(int populationSize, String filename) {
 		// generate array of random NN 
 		this.population = new MarioESNNController[populationSize];
-		for(int i = 0; i < population.length; i++) {
-			population[i] = new MarioESNNController();
-		}
 		this.fitness = new float[populationSize];
 		this.elite = populationSize/3;
-		
-		for(int i = 0; i < this.elite; i++) {
-			population[i].startingWeightsFile = filename;
+		for(int i = 0; i < population.length; i++) {
+			population[i] = new MarioESNNController(filename);
 		}
 		
 		r = new Random();
-		String argsString = "-vis off -ld 0 -ag MarioESNNController";
+		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
 		
 		// run the first time
