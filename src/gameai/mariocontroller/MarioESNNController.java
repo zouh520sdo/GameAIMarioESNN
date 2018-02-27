@@ -35,7 +35,6 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	    NN = new NeuralNetwork(NNInputLength, Environment.numberOfButtons);
 	    
     	NN.randomWeights();
-	    NN.writeWeightsToFile("test1.txt");
 	    reset();
 	}
 	
@@ -57,7 +56,6 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	    else {
 	    	NN.loadWeights(startingWeightsFile);
 	    }
-	    NN.writeWeightsToFile("test1.txt");
 	    reset();
 	}
 	

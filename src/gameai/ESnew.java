@@ -17,6 +17,7 @@ public class ESnew {
 	//*use numbers divisible by 3
 	// choose 1/3 elite
 	// 1/3 for mutation & 1/3 for recombination
+	public String outputFile = "best.txt";
 	private MarioESNNController[] population;
 	private float[] fitness;
 	private int elite;
@@ -244,7 +245,7 @@ public class ESnew {
     }
 	
 	public double getBestFitnesses() {
-		population[0].NN.writeWeightsToFile("best.txt");
+		population[0].NN.writeWeightsToFile(outputFile);
 		return fitness[0];
 	}
 }
