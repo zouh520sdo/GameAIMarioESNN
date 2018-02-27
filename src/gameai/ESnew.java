@@ -32,7 +32,7 @@ public class ESnew {
 			population[i] = new MarioESNNController();
 		}
 		this.fitness = new float[populationSize];
-		this.elite = populationSize/3;
+		this.elite = populationSize/4;
 		r = new Random();
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
@@ -53,7 +53,7 @@ public class ESnew {
 		// generate array of random NN 
 		this.population = new MarioESNNController[populationSize];
 		this.fitness = new float[populationSize];
-		this.elite = populationSize/3;
+		this.elite = populationSize/4;
 		for(int i = 0; i < elite; i++) {
 			population[i] = new MarioESNNController(filename);
 		}
@@ -84,9 +84,10 @@ public class ESnew {
 		// sort
 		for(int i = 0; i < elite; i++) {
 			population[elite+i] = new MarioESNNController(population[i]);
-			mutate(population[elite+1]);
+			mutate(population[elite+i]);
 		}
 		OrderRecombine();
+		AddNewGuys();
 		if(this.cmdLineOptions.isVisualization())
 			this.runOneEpisode(population[0]);
 		// set true in the main function
@@ -99,7 +100,7 @@ public class ESnew {
 	
 	// mutate the agent
 	private void mutate(MarioESNNController agent) {
-		double[] weights = agent.NN.getWeights();
+		double[] weights = agent.NN.getWeights().clone();
 		double[] mutationValue = new double[weights.length];
 		//for(double d : mutationValue) {
 		//	d = r.nextGaussian()*0.2;
@@ -121,10 +122,16 @@ public class ESnew {
 		}
 	}
 	
+	private void AddNewGuys() {
+		for (int i=0; i< elite; i++) {
+			population[elite*3+i] = new MarioESNNController();
+		}
+	}
+	
 	// take in two NN and randomly cross over
 	private MarioESNNController RandomCrossover(MarioESNNController a1, MarioESNNController a2) {
-		double[] weights1 = a1.NN.getWeights();
-		double[] weights2 = a2.NN.getWeights();
+		double[] weights1 = a1.NN.getWeights().clone();
+		double[] weights2 = a2.NN.getWeights().clone();
 		for(int i = 0; i < weights1.length; i++) {
 			int randint = r.nextInt(2);
 			if (randint == 0)

@@ -47,7 +47,7 @@ public class NeuralNetwork {
 	 * @param weights
 	 */
 	public void loadWeights(double[] weights) {
-		this.weights = weights;
+		this.weights = weights.clone();
 		int from = 0;
 		for (int i=0; i<layers.length; i++) {
 			int to = from + layers[i].row*layers[i].col;
@@ -114,7 +114,7 @@ public class NeuralNetwork {
 	}
 	
 	public double[] getWeights() {
-		return this.weights;
+		return this.weights.clone();
 	}
 	
 	/**
