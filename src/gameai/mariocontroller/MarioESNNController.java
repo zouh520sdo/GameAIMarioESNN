@@ -11,8 +11,8 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	public NeuralNetwork NN;
 	public int NNInputLength;
 	public double sigma;
-	public int receptiveWidth = 5;
-	public int receptiveHeight = 5;
+	public int receptiveWidth = 2;
+	public int receptiveHeight = 2;
 	public int stateAmount = 6; // < 12
 	protected double[] input;
 	

@@ -4,11 +4,11 @@ import ch.idsia.benchmark.tasks.BasicTask;
 public class MyESTest 
 {
     final static int generations = 200;
-    final static int populationSize = 30;
+    final static int populationSize = 120;
 
     public static void main(String[] args)
     {
-        ESnew es = new ESnew(populationSize, "best_test.txt");
+        ESnew es = new ESnew(populationSize);//populationSize, "best_test.txt");
         es.cmdLineOptions.setPauseWorld(false);
         System.out.println("Evolving ");
         for (int gen = 0; gen < generations; gen++)
