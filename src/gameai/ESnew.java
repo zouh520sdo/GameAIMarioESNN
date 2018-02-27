@@ -54,7 +54,7 @@ public class ESnew {
 		this.population = new MarioESNNController[populationSize];
 		this.fitness = new float[populationSize];
 		this.elite = populationSize/3;
-		for(int i = 0; i < population.length; i++) {
+		for(int i = 0; i < elite; i++) {
 			population[i] = new MarioESNNController(filename);
 		}
 		
@@ -72,6 +72,7 @@ public class ESnew {
 				System.out.println("bad" + i);
 		}
 		sortPopulationByFitness();
+		population[0].NN.writeWeightsToFile("starttest.txt");
 	}
 	
 	public void nextGeneration() {
