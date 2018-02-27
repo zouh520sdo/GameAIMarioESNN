@@ -36,7 +36,7 @@ public class ESnew {
 		r = new Random();
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
-		
+		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
 			evaluate(i);
@@ -65,6 +65,7 @@ public class ESnew {
 		r = new Random();
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
+		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
 		
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
@@ -111,7 +112,7 @@ public class ESnew {
 		//	d = r.nextGaussian()*0.2;
 		//}
 		for(int i = 0; i < weights.length; i++)
-			mutationValue[i] = r.nextGaussian()*0.5;
+			mutationValue[i] = r.nextGaussian();
 		for(int i = 0; i < weights.length; i++) {
 			weights[i] += mutationValue[i];
 		}
