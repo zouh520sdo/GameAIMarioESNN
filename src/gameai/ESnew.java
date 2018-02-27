@@ -89,10 +89,11 @@ public class ESnew {
 			mutate(population[elite+1]);
 		}
 		OrderRecombine();
+		evaluate(0);
+		// set true in the main function
+		cmdLineOptions.setVisualization(false);
 		for(int i = elite; i < population.length; i++) {
 			evaluate(i);
-			// set true in the main function
-			cmdLineOptions.setVisualization(false);
 		}
 		sortPopulationByFitness();
 	}

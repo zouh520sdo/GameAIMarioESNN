@@ -4,7 +4,7 @@ import ch.idsia.benchmark.tasks.BasicTask;
 public class MyESTest 
 {
     final static int generations = 100;
-    final static int populationSize = 120;
+    final static int populationSize = 30;
 
     public static void main(String[] args)
     {
