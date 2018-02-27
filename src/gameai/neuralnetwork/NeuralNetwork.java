@@ -138,7 +138,22 @@ public class NeuralNetwork {
 	public boolean[] getButtons(double[] input) {
 		double[] rawOutput = calc(input);
 		boolean[] buttons = new boolean[rawOutput.length];
-		for (int i=0; i<buttons.length; i++) {
+		
+		if (rawOutput[0] == 0 && rawOutput[1] == 0) {
+			buttons[0] = false;
+			buttons[1] = false;
+		}
+		else if (rawOutput[1] >= rawOutput[0]) {
+			buttons[1] = true;
+			buttons[0] = false;
+		}
+		else {
+			buttons[1] = false;
+			buttons[0] = true;
+		}
+		
+		for (int i=2; i<buttons.length; i++) {
+			
 			if (rawOutput[i] == 0) {
 				buttons[i] = false;
 			}

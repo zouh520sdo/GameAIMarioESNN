@@ -8,7 +8,7 @@ public class MyESTest
 
     public static void main(String[] args)
     {
-        ESnew es = new ESnew(populationSize, "best_test.txt");
+        ESnew es = new ESnew(populationSize);
         es.cmdLineOptions.setPauseWorld(false);
         System.out.println("Evolving ");
         for (int gen = 0; gen < generations; gen++)
