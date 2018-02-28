@@ -27,10 +27,12 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
-	protected int level = 25;
+	protected int level = 0;
+	public int levelRand = 5;
+	public float ageCost = 5;
 	
 	public ESnew(int populationSize) {
-		// generate array of random NN 
+		// generate array of random NN
 		this.population = new MarioESNNController[populationSize];
 		for(int i = 0; i < population.length; i++) {
 			population[i] = new MarioESNNController();
@@ -43,7 +45,7 @@ public class ESnew {
 		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
-			evaluate(i);
+			evaluateRandLevels(i, levelRand);
 		}
 		System.out.println("start");
 		for(int i = 0; i < population.length; i++) {
@@ -72,7 +74,7 @@ public class ESnew {
 		
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
-			evaluate(i);
+			evaluateRandLevels(i, levelRand);
 		}
 		System.out.println("start");
 		for(int i = 0; i < population.length; i++) {
@@ -80,7 +82,6 @@ public class ESnew {
 				System.out.println("bad" + i);
 		}
 		sortPopulationByFitness();
-		population[0].NN.writeWeightsToFile("starttest.txt");
 	}
 	
 	public void nextGeneration() {
@@ -90,8 +91,14 @@ public class ESnew {
 		// recombine as the third 1/3
 		// evaluate second and third 
 		// sort
+		for (int i=0; i<elite; i++) {
+			population[i].age+=1;
+			fitness[i] -= ageCost;
+		}
+		
 		for(int i = 0; i < elite; i++) {
 			population[elite+i] = new MarioESNNController(population[i]);
+			population[elite+i].age = 0;
 			mutate(population[elite+i]);
 		}
 		
@@ -101,14 +108,16 @@ public class ESnew {
 		//this.cmdLineOptions.setLevelRandSeed(r.nextInt());
 		
 		// set true in the main function
+		//cmdLineOptions.setLevelRandSeed(r.nextInt());
 		boolean display = this.cmdLineOptions.isVisualization();
 		cmdLineOptions.setVisualization(false);
 		for(int i = elite; i < population.length; i++) {
-			evaluate(i);
+			evaluateRandLevels(i, levelRand);
 		}
 		sortPopulationByFitness();
 		if(display) {
 			cmdLineOptions.setVisualization(true);
+			cmdLineOptions.setLevelRandSeed(r.nextInt(levelRand));
 			evaluateSingleLevel(population[0]);
 			System.out.println("Fitness " + fitness[0]);
 			evaluateSingleLevel(population[1]);
@@ -147,8 +156,10 @@ public class ESnew {
 			}
 			int p2 = indices.remove((r.nextInt(indices.size())));
 			population[elite*2+currentI] = RandomCrossover(population[p1], population[p2]);
+			population[elite*2+currentI].age = 0;
 			currentI++;
 			population[elite*2+currentI] = RandomCrossover(population[p2], population[p1]);
+			population[elite*2+currentI].age = 0;
 			currentI++;
 		}
 	}
@@ -162,6 +173,7 @@ public class ESnew {
 		while (!indices.isEmpty()) {
 			int p1 = indices.remove((r.nextInt(indices.size())));
 			population[elite*2+currentI] = RandomCrossover(population[p1], population[elite* 3 + p1]);
+			population[elite*2+currentI].age = 0;
 			currentI++;
 		}
 	}
@@ -207,6 +219,39 @@ public class ESnew {
 		fitness[which] = evaluateSingleLevel();
 	}
 	
+	private void evaluateRandLevels(int which, int rand) {
+		// run one map? many map? difficulty?
+		// collect score and progress
+		this.cmdLineOptions.setAgent(population[which]);
+		float f = 0;
+		float fs[] = new float[rand];
+		for (int i=0; i<rand; i++) {
+			this.cmdLineOptions.setLevelRandSeed(i);
+			 fs[i] = evaluateSingleLevel();
+		}
+		// Sort fs
+		for (int i=0; i<fs.length; i++) {
+			for (int j=i+1; j<fs.length; j++) {
+				if (fs[i] > fs[j]) {
+					float temp = fs[i];
+					fs[i] = fs[j];
+					fs[j] = temp;
+				}
+			}
+		}
+		
+		/*
+		f = fs[0];
+		for (int i=1; i<fs.length; i++) {
+			f =(f + fs[i]) * 0.5f;
+		}
+		*/
+		for (int i=0; i<fs.length; i++) {
+			f += fs[i];
+		}
+		fitness[which] = (f / fs.length);
+	}
+	
 	private float evaluateSingleLevel()
 	{
 		Agent agent = cmdLineOptions.getAgent();
@@ -218,13 +263,16 @@ public class ESnew {
 	    fitness -= (2-this.environment.getMarioMode())*10;
 	    fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
 	    fitness -= this.environment.getEvaluationInfo().timeSpent * 8;
+	    fitness -= (((MarioESNNController)agent).age * ageCost);
+	    //System.out.println("age " + ((MarioESNNController)agent).age * 5);
 	    if(cmdLineOptions.isVisualization())
 	    	System.out.println("Total Fitness: " + fitness + 
 	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
 	    		"+\nKills: " + this.environment.getKillsTotal() * 100 + 
 	    		"-\nHealth: " + (2-this.environment.getMarioMode())*10 + 
 	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness() + 
-	    	"-\nTimeSpend: " + this.environment.getEvaluationInfo().timeSpent * 8); 
+	    	"-\nTimeSpend: " + this.environment.getEvaluationInfo().timeSpent * 8 + 
+	    	"-\nAge: " + ((MarioESNNController)agent).age * ageCost);
 	    return fitness;
 	}
 	
@@ -239,13 +287,15 @@ public class ESnew {
 	    fitness -= (2-this.environment.getMarioMode())*10;
 	    fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
 	    fitness -= this.environment.getEvaluationInfo().timeSpent * 8;
+	    fitness -= ((MarioESNNController)agent).age * ageCost;
 	    if(cmdLineOptions.isVisualization())
 	    	System.out.println("Total Fitness: " + fitness + 
 	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
 	    		"+\nKills: " + this.environment.getKillsTotal() * 100 + 
 	    		"-\nHealth: " + (2-this.environment.getMarioMode())*10 + 
 	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness() + 
-	    	"-\nTimeSpend: " + this.environment.getEvaluationInfo().timeSpent * 8);
+	    	"-\nTimeSpend: " + this.environment.getEvaluationInfo().timeSpent * 8 + 
+	    	"-\nAge: " + ((MarioESNNController)agent).age * ageCost);
 	    return fitness;
 	}
 	
@@ -300,12 +350,14 @@ public class ESnew {
     }
 	
 	public double getBestFitnesses() {
+		System.out.println("Best age " + population[0].age);
 		population[0].NN.writeWeightsToFile(outputFile);
 		return fitness[0];
 	}
 	
 	public double getNthFitness(int n) {
-		population[0].NN.writeWeightsToFile(Integer.toString(n) + outputFile);
+		System.out.println("Best " + n + " age " + population[n].age);
+		population[n].NN.writeWeightsToFile(Integer.toString(n) + outputFile);
 		return fitness[n];
 	}
 }

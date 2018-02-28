@@ -15,7 +15,7 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	public int receptiveHeight = 8;
 	public int stateAmount = 11; // < 12
 	protected double[] input;
-	
+	public int age;
 	Random r;
 	
 	/**
@@ -35,6 +35,8 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	    NN = new NeuralNetwork(NNInputLength, Environment.numberOfButtons);
 	    
     	NN.randomWeights();
+    	
+    	age = 0;
 	    reset();
 	}
 	
@@ -56,6 +58,7 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	    else {
 	    	NN.loadWeights(startingWeightsFile);
 	    }
+	    age = 0;
 	    reset();
 	}
 	
@@ -67,6 +70,7 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 	    NN = new NeuralNetwork(NNInputLength, Environment.numberOfButtons);
 	    NN.loadWeights(other.NN.getWeights());
 	    input = new double[NNInputLength];
+	    age = other.age;
 	    reset();
 	}
 	
