@@ -1,6 +1,9 @@
 package gameai;
 
 import gameai.mariocontroller.MarioESNNController;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import ch.idsia.agents.Agent;
@@ -24,7 +27,7 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
-	protected int level = 0;
+	protected int level = 25;
 	
 	public ESnew(int populationSize) {
 		// generate array of random NN 
@@ -34,7 +37,7 @@ public class ESnew {
 		}
 		this.fitness = new float[populationSize];
 		this.elite = populationSize/4;
-		r = new Random();
+		r = new Random(System.currentTimeMillis());
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
 		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
@@ -55,15 +58,14 @@ public class ESnew {
 		this.population = new MarioESNNController[populationSize];
 		this.fitness = new float[populationSize];
 		this.elite = populationSize/4;
-		for(int i = 0; i < elite; i++) {
-			population[i] = new MarioESNNController(filename);
-		}
 		
-		for(int i = elite; i < population.length; i++) {
+		population[0] = new MarioESNNController(filename);
+		
+		for(int i = 1; i < population.length; i++) {
 			population[i] = new MarioESNNController();
 		}
 		
-		r = new Random();
+		r = new Random(System.currentTimeMillis());
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
 		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
@@ -92,17 +94,27 @@ public class ESnew {
 			population[elite+i] = new MarioESNNController(population[i]);
 			mutate(population[elite+i]);
 		}
-		OrderRecombine();
+		
 		AddNewGuys();
-		if(this.cmdLineOptions.isVisualization()) {
-			System.out.println("Fitness " + evaluateSingleLevel(population[0]));
-		}
+		OrderRecombineWithNew();
+		
+		//this.cmdLineOptions.setLevelRandSeed(r.nextInt());
+		
 		// set true in the main function
+		boolean display = this.cmdLineOptions.isVisualization();
 		cmdLineOptions.setVisualization(false);
 		for(int i = elite; i < population.length; i++) {
 			evaluate(i);
 		}
 		sortPopulationByFitness();
+		if(display) {
+			cmdLineOptions.setVisualization(true);
+			evaluateSingleLevel(population[0]);
+			System.out.println("Fitness " + fitness[0]);
+			evaluateSingleLevel(population[1]);
+			System.out.println("Fitness " + fitness[1]);
+			cmdLineOptions.setVisualization(false);
+		}
 	}
 	
 	// mutate the agent
@@ -113,7 +125,7 @@ public class ESnew {
 		//	d = r.nextGaussian()*0.2;
 		//}
 		for(int i = 0; i < weights.length; i++)
-			mutationValue[i] = r.nextGaussian();
+			mutationValue[i] = r.nextGaussian() * r.nextDouble() * 0.1;
 		for(int i = 0; i < weights.length; i++) {
 			weights[i] += mutationValue[i];
 		}
@@ -122,12 +134,39 @@ public class ESnew {
 	
 	// recombines the first 1/3 in order
 	private void OrderRecombine() {
-		for(int i = 0; i < elite; i++) {
-			if(i == elite-1)
-				population[elite*2+i] = RandomCrossover(population[i], population[0]);
-			population[elite*2+i] = RandomCrossover(population[i], population[i+1]);
+		List<Integer> indices = new ArrayList<Integer>(elite);
+		for (int i=0; i<elite;i++) {
+			indices.add(i);
+		}
+		int currentI = 0;
+		while (!indices.isEmpty()) {
+			int p1 = indices.remove((r.nextInt(indices.size())));
+			if (indices.isEmpty()) {
+				population[elite*2+currentI] = new MarioESNNController(population[p1]);
+				break;
+			}
+			int p2 = indices.remove((r.nextInt(indices.size())));
+			population[elite*2+currentI] = RandomCrossover(population[p1], population[p2]);
+			currentI++;
+			population[elite*2+currentI] = RandomCrossover(population[p2], population[p1]);
+			currentI++;
 		}
 	}
+	
+	private void OrderRecombineWithNew() {
+		List<Integer> indices = new ArrayList<Integer>(elite);
+		for (int i=0; i<elite;i++) {
+			indices.add(i);
+		}
+		int currentI = 0;
+		while (!indices.isEmpty()) {
+			int p1 = indices.remove((r.nextInt(indices.size())));
+			population[elite*2+currentI] = RandomCrossover(population[p1], population[elite* 3 + p1]);
+			currentI++;
+		}
+	}
+	
+	
 	
 	private void AddNewGuys() {
 		for (int i=0; i< elite; i++) {
@@ -149,6 +188,18 @@ public class ESnew {
 		return child;
 	}
 	
+	private MarioESNNController OnePointCrossover(MarioESNNController a1, MarioESNNController a2) {
+		double[] weights1 = a1.NN.getWeights().clone();
+		double[] weights2 = a2.NN.getWeights().clone();
+		int cutPoint = r.nextInt(weights1.length);
+		for (int i=0; i <= cutPoint; i++) {
+			weights1[i] = weights2[i];
+		}
+		MarioESNNController child = new MarioESNNController(a1);
+		child.NN.loadWeights(weights1);
+		return child;
+	}
+	
 	private void evaluate(int which) {
 		// run one map? many map? difficulty?
 		// collect score and progress
@@ -163,15 +214,17 @@ public class ESnew {
 	    runOneEpisode(agent);
 	    fitness += this.environment.getEvaluationInfo().computeDistancePassed();
 	    //fitness -= (10.0 / this.environment.getEvaluationInfo().computeDistancePassed());
-	    fitness += this.environment.getKillsTotal();
+	    fitness += this.environment.getKillsTotal() * 100;
 	    fitness -= (2-this.environment.getMarioMode())*10;
 	    fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
+	    fitness -= this.environment.getEvaluationInfo().timeSpent * 8;
 	    if(cmdLineOptions.isVisualization())
 	    	System.out.println("Total Fitness: " + fitness + 
 	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
-	    		"+\nKills: " + this.environment.getKillsTotal() + 
+	    		"+\nKills: " + this.environment.getKillsTotal() * 100 + 
 	    		"-\nHealth: " + (2-this.environment.getMarioMode())*10 + 
-	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness());
+	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness() + 
+	    	"-\nTimeSpend: " + this.environment.getEvaluationInfo().timeSpent * 8); 
 	    return fitness;
 	}
 	
@@ -182,15 +235,17 @@ public class ESnew {
 	    runOneEpisode(agent);
 	    fitness += this.environment.getEvaluationInfo().computeDistancePassed();
 	    //fitness -= (10.0 / this.environment.getEvaluationInfo().computeDistancePassed());
-	    fitness += this.environment.getKillsTotal();
+	    fitness += this.environment.getKillsTotal() * 100;
 	    fitness -= (2-this.environment.getMarioMode())*10;
-	    //fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
+	    fitness += this.environment.getEvaluationInfo().computeWeightedFitness();
+	    fitness -= this.environment.getEvaluationInfo().timeSpent * 8;
 	    if(cmdLineOptions.isVisualization())
 	    	System.out.println("Total Fitness: " + fitness + 
 	    		"=\nDistance Passed: " + this.environment.getEvaluationInfo().computeDistancePassed() + 
-	    		"+\nKills: " + this.environment.getKillsTotal() + 
+	    		"+\nKills: " + this.environment.getKillsTotal() * 100 + 
 	    		"-\nHealth: " + (2-this.environment.getMarioMode())*10 + 
-	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness());
+	    		"+\nWeightedTotal: " + this.environment.getEvaluationInfo().computeWeightedFitness() + 
+	    	"-\nTimeSpend: " + this.environment.getEvaluationInfo().timeSpent * 8);
 	    return fitness;
 	}
 	
@@ -247,5 +302,10 @@ public class ESnew {
 	public double getBestFitnesses() {
 		population[0].NN.writeWeightsToFile(outputFile);
 		return fitness[0];
+	}
+	
+	public double getNthFitness(int n) {
+		population[0].NN.writeWeightsToFile(Integer.toString(n) + outputFile);
+		return fitness[n];
 	}
 }

@@ -17,6 +17,7 @@ public interface Environment
 {
 public static final int numberOfButtons = 6;
 
+
 public static final int MARIO_KEY_DOWN = Mario.KEY_DOWN;
 public static final int MARIO_KEY_JUMP = Mario.KEY_JUMP;
 public static final int MARIO_KEY_LEFT = Mario.KEY_LEFT;
