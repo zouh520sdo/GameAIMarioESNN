@@ -1,6 +1,7 @@
 package gameai;
 
 import gameai.mariocontroller.MarioESNNController;
+import gameai.neuralnetwork.Layer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +28,15 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
-	protected int level = 0;
+	protected int level = 25;
 	public int levelRand = 5;
 	public float ageCost = 1.5f;
 	
+	protected double mutationRate = 0.02;
+	protected double preElitesFitness;
+	
 	public ESnew(int populationSize) {
+		preElitesFitness = 0;
 		// generate array of random NN
 		this.population = new MarioESNNController[populationSize];
 		for(int i = 0; i < population.length; i++) {
@@ -54,9 +59,11 @@ public class ESnew {
 				System.out.println("bad" + i);
 		}
 		sortPopulationByFitness();
+		updateMutationRateBasedOnElitesFit();
 	}
 	
 	public ESnew(int populationSize, String filename) {
+		preElitesFitness = 0;
 		// generate array of random NN 
 		this.population = new MarioESNNController[populationSize];
 		this.fitness = new float[populationSize];
@@ -84,6 +91,7 @@ public class ESnew {
 				System.out.println("bad" + i);
 		}
 		sortPopulationByFitness();
+		updateMutationRateBasedOnElitesFit();
 	}
 	
 	public void nextGeneration() {
@@ -118,6 +126,7 @@ public class ESnew {
 			//evaluate(i);
 		}
 		sortPopulationByFitness();
+		updateMutationRateBasedOnElitesFit();
 		if(display) {
 			cmdLineOptions.setVisualization(true);
 			cmdLineOptions.setLevelRandSeed(r.nextInt(levelRand));
@@ -137,7 +146,7 @@ public class ESnew {
 		//	d = r.nextGaussian()*0.2;
 		//}
 		for(int i = 0; i < weights.length; i++)
-			mutationValue[i] = r.nextGaussian() * r.nextDouble() * 0.02;
+			mutationValue[i] = r.nextGaussian() * r.nextDouble() * mutationRate;
 		for(int i = 0; i < weights.length; i++) {
 			weights[i] += mutationValue[i];
 		}
@@ -213,6 +222,19 @@ public class ESnew {
 		MarioESNNController child = new MarioESNNController(a1);
 		child.NN.loadWeights(weights1);
 		return child;
+	}
+	
+	protected void updateMutationRateBasedOnElitesFit() {
+		double temp = 0;
+		for (int i=0; i<elite; i++) {
+			temp += fitness[i];
+		}
+		temp /= elite;
+		
+		double s = 1.0 / Layer.sigmoid(Math.abs(temp - preElitesFitness)) - 1; // 1 .. 2
+		mutationRate = s;//0.01 .. 1
+		
+		preElitesFitness = temp;
 	}
 	
 	private void evaluate(int which) {

@@ -3,13 +3,13 @@ import ch.idsia.benchmark.tasks.BasicTask;
 
 public class MyESTest 
 {
-    final static int generations = 1;
-    final static int populationSize = 4;
+    final static int generations = 1000;
+    final static int populationSize = 120;
 
     public static void main(String[] args)
     {
-        ESnew es = new ESnew(populationSize, "best_huang_1_level0_input8_8_NN12_12_randomcrossoverwithnew_mutaterandom0_1_levelrand5.txt");
-        es.outputFile= "best_huang_1_level0_levelrand5.txt";
+        ESnew es = new ESnew(populationSize, "best_huang_1_level25_input8_8_NN12_12_randomcrossoverwithnew_mutaterandom0_1_levelrand5.txt");
+        es.outputFile= "best_huang_1_level25_input8_8_NN12_12_randomcrossoverwithnew_mutaterandom0_1_levelrand5.txt";
         es.cmdLineOptions.setPauseWorld(false);
         System.out.println("Evolving ");
         for (int gen = 0; gen < generations; gen++)
