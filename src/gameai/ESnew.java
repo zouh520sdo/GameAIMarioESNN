@@ -29,7 +29,7 @@ public class ESnew {
 	protected final Environment environment = MarioEnvironment.getInstance();
 	protected int level = 0;
 	public int levelRand = 5;
-	public float ageCost = 5;
+	public float ageCost = 1.5f;
 	
 	public ESnew(int populationSize) {
 		// generate array of random NN
@@ -45,8 +45,8 @@ public class ESnew {
 		//cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
-			//evaluateRandLevels(i, levelRand);
-			evaluate(i);
+			evaluateRandLevels(i, levelRand);
+			//evaluate(i);
 		}
 		System.out.println("start");
 		for(int i = 0; i < population.length; i++) {
@@ -75,8 +75,8 @@ public class ESnew {
 		
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
-			//evaluateRandLevels(i, levelRand);
-			evaluate(i);
+			evaluateRandLevels(i, levelRand);
+			//evaluate(i);
 		}
 		System.out.println("start");
 		for(int i = 0; i < population.length; i++) {
@@ -114,8 +114,8 @@ public class ESnew {
 		boolean display = this.cmdLineOptions.isVisualization();
 		cmdLineOptions.setVisualization(false);
 		for(int i = elite; i < population.length; i++) {
-			//evaluateRandLevels(i, levelRand);
-			evaluate(i);
+			evaluateRandLevels(i, levelRand);
+			//evaluate(i);
 		}
 		sortPopulationByFitness();
 		if(display) {
@@ -137,7 +137,7 @@ public class ESnew {
 		//	d = r.nextGaussian()*0.2;
 		//}
 		for(int i = 0; i < weights.length; i++)
-			mutationValue[i] = r.nextGaussian() * r.nextDouble() * 0.1;
+			mutationValue[i] = r.nextGaussian() * r.nextDouble() * 0.02;
 		for(int i = 0; i < weights.length; i++) {
 			weights[i] += mutationValue[i];
 		}
