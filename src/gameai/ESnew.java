@@ -42,10 +42,11 @@ public class ESnew {
 		r = new Random(System.currentTimeMillis());
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
-		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
+		//cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
-			evaluateRandLevels(i, levelRand);
+			//evaluateRandLevels(i, levelRand);
+			evaluate(i);
 		}
 		System.out.println("start");
 		for(int i = 0; i < population.length; i++) {
@@ -70,11 +71,12 @@ public class ESnew {
 		r = new Random(System.currentTimeMillis());
 		String argsString = "-vis off -ld " + level + " -ag MarioESNNController";
 		cmdLineOptions = new CmdLineOptions(argsString);
-		cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
+		//cmdLineOptions.setFPS(GlobalOptions.MaxFPS);
 		
 		// run the first time
 		for(int i = 0; i < population.length; i++) {
-			evaluateRandLevels(i, levelRand);
+			//evaluateRandLevels(i, levelRand);
+			evaluate(i);
 		}
 		System.out.println("start");
 		for(int i = 0; i < population.length; i++) {
@@ -112,16 +114,17 @@ public class ESnew {
 		boolean display = this.cmdLineOptions.isVisualization();
 		cmdLineOptions.setVisualization(false);
 		for(int i = elite; i < population.length; i++) {
-			evaluateRandLevels(i, levelRand);
+			//evaluateRandLevels(i, levelRand);
+			evaluate(i);
 		}
 		sortPopulationByFitness();
 		if(display) {
 			cmdLineOptions.setVisualization(true);
-			cmdLineOptions.setLevelRandSeed(r.nextInt(levelRand));
+			//cmdLineOptions.setLevelRandSeed(r.nextInt(levelRand));
 			evaluateSingleLevel(population[0]);
 			System.out.println("Fitness " + fitness[0]);
-			evaluateSingleLevel(population[1]);
-			System.out.println("Fitness " + fitness[1]);
+			//evaluateSingleLevel(population[1]);
+			//System.out.println("Fitness " + fitness[1]);
 			cmdLineOptions.setVisualization(false);
 		}
 	}
