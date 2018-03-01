@@ -28,10 +28,8 @@ public class MyESTest
 	            es.nextGeneration();
 	            double bestResult = es.getBestFitnesses(0);
 	            double secondResult = es.getBestFitnesses(1);
-	            System.out.println("Generation " + gen + " best " + bestResult);
-	            System.out.println("Generation " + gen + " best2 " + secondResult);
-	            p.println("Generation " + gen + " best " + bestResult);
-	            p.println("Generation " + gen + " best2 " + secondResult);
+	            System.out.println("Generation " + gen + " best: " + bestResult + "second: " + secondResult);
+	            p.println("Generation " + gen + " best: " + bestResult + "second: " + secondResult);
 	            
 	            p.flush();
 	            if(gen%5 == 0)
@@ -41,10 +39,8 @@ public class MyESTest
 	        es.nextGeneration();
 	        double bestResult = es.getBestFitnesses(0);
 	        double secondResult = es.getBestFitnesses(1);
-	        System.out.println("Generation " + generations + " best " + bestResult);
-	        System.out.println("Generation " + generations + " best2 " + secondResult);
-	        p.println("Generation " + generations + " best " + bestResult);
-	        p.println("Generation " + generations + " best2 " + secondResult);
+            System.out.println("Generation " + generations + " best: " + bestResult + "second: " + secondResult);
+            p.println("Generation " + generations + " best: " + bestResult + "second: " + secondResult);
 	        
 	        p.close();
     	} catch (IOException e)
