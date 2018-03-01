@@ -27,7 +27,7 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
-	protected int level = 0;
+	protected int level = 25;
 	public int levelRand = 5;
 	public float ageCost = 1.5f;
 	
