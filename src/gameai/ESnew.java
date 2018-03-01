@@ -27,7 +27,7 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
-	protected int level = 25;
+	protected int level = 0;
 	public int levelRand = 5;
 	public float ageCost = 1.5f;
 	
@@ -120,11 +120,11 @@ public class ESnew {
 		sortPopulationByFitness();
 		if(display) {
 			cmdLineOptions.setVisualization(true);
-			//cmdLineOptions.setLevelRandSeed(r.nextInt(levelRand));
+			cmdLineOptions.setLevelRandSeed(r.nextInt(levelRand));
 			evaluateSingleLevel(population[0]);
 			System.out.println("Fitness " + fitness[0]);
-			//evaluateSingleLevel(population[1]);
-			//System.out.println("Fitness " + fitness[1]);
+			evaluateSingleLevel(population[1]);
+			System.out.println("Fitness " + fitness[1]);
 			cmdLineOptions.setVisualization(false);
 		}
 	}
