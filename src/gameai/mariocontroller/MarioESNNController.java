@@ -37,6 +37,8 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
     	NN.randomWeights();
     	
     	age = 0;
+    	
+    	NN.loadWeights("best_huang_1_level0_input8_8_NN12_12_randomcrossoverwithnew_mutaterandom0_1.txt");
 	    reset();
 	}
 	
@@ -131,7 +133,7 @@ public class MarioESNNController extends BasicMarioAIAgent implements Agent {
 			index++;
 		}
 		
-		// Last buttons 
+		// Last buttons
 		for (int i=0; i<action.length; i++) {
 			//System.out.println("index " + index);
 			if (action[i]) {

@@ -108,7 +108,7 @@ public class NeuralNetwork {
 	 */
 	public void randomWeights() {
 		for (int i=0; i<weights.length; i++) {
-			weights[i] = r.nextDouble() * 0.25;
+			weights[i] = (r.nextDouble() - 0.5) * 1.0;
 		}
 		loadWeights(weights);
 	}

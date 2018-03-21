@@ -28,7 +28,7 @@ public class ESnew {
 	public CmdLineOptions cmdLineOptions;
 	private Random r;
 	protected final Environment environment = MarioEnvironment.getInstance();
-	protected int level = 25;
+	protected int level = 5;
 	public int levelRand = 5;
 	public float ageCost = 1.5f;
 	
@@ -227,13 +227,17 @@ public class ESnew {
 	protected void updateMutationRateBasedOnElitesFit() {
 		double temp = 0;
 		for (int i=0; i<elite; i++) {
-			temp += fitness[i];
+			temp += (fitness[i] + population[i].age * ageCost);
 		}
 		temp /= elite;
 		
-		double s = 1.0 / Layer.sigmoid(Math.abs(temp - preElitesFitness)) - 1; // 1 .. 2
-		mutationRate = s;//0.01 .. 1
 		
+		double diff = Math.abs(temp - preElitesFitness);
+		double s = Math.exp(-diff/100.0); // (0 .. 1]
+		mutationRate = 0.5 * s;// (0 .. 2]
+		System.out.println("mutation rate diff " + diff);
+		System.out.println("mutation rate s " + s);
+		System.out.println("mutation rate " + mutationRate);
 		preElitesFitness = temp;
 	}
 	
